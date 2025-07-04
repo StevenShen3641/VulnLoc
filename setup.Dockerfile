@@ -30,17 +30,18 @@ RUN rm cmake-3.16.2.tar.gz
 RUN mv cmake-3.16.2 cmake
 WORKDIR /root/workspace/deps/cmake
 RUN ./bootstrap
-RUN make
+RUN make -j$(nproc)
 RUN make install
 WORKDIR /root/workspace/deps
 
 # install dynamorio
 RUN git clone https://github.com/DynamoRIO/dynamorio.git
 WORKDIR /root/workspace/deps/dynamorio
+RUN git checkout a7737a1aaa86348bcff14e1846275fcbb0810abd
 RUN mkdir build
 WORKDIR /root/workspace/deps/dynamorio/build
 RUN cmake ../
-RUN make
+RUN make -j$(nproc)
 WORKDIR /root/workspace/deps
 
 # set up the tracer
@@ -48,11 +49,12 @@ COPY ./code/iftracer.zip /root/workspace/deps/iftracer.zip
 RUN unzip iftracer.zip
 RUN rm iftracer.zip
 WORKDIR /root/workspace/deps/iftracer/iftracer
+ENV CMAKE_PREFIX_PATH="/root/workspace/deps/dynamorio/build"
 RUN cmake CMakeLists.txt
-RUN make
+RUN make -j$(nproc)
 WORKDIR /root/workspace/deps/iftracer/ifLineTracer
 RUN cmake CMakeLists.txt
-RUN make
+RUN make -j$(nproc)
 WORKDIR /root/workspace 
 
 # set up CVE-2016-5314
@@ -66,7 +68,7 @@ RUN unzip source.zip
 RUN rm source.zip
 WORKDIR /root/workspace/cves/cve_2016_5314/source
 RUN ./configure
-RUN make CFLAGS="-static -ggdb" CXXFLAGS="-static -ggdb"
+RUN make -j$(nproc) CFLAGS="-static -ggdb" CXXFLAGS="-static -ggdb"
 # copy exploit
 WORKDIR /root/workspace/cves/cve_2016_5314
 COPY ./data/libtiff/cve_2016_5314/exploit ./exploit
@@ -78,7 +80,7 @@ RUN tar xjf valgrind-3.15.0.tar.bz2
 RUN mv valgrind-3.15.0 valgrind
 WORKDIR /root/workspace/deps/valgrind
 RUN ./configure
-RUN make
+RUN make -j$(nproc)
 RUN make install
 
 # prepare code
@@ -91,5 +93,6 @@ COPY ./code/patchloc.py ./
 COPY ./code/tracer.py ./
 COPY ./code/utils.py ./
 COPY ./code/env.py ./
+ENV LC_ALL="C"
 
 WORKDIR /root/workspace
