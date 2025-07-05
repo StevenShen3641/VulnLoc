@@ -37,7 +37,7 @@ WORKDIR /root/workspace/deps
 # install dynamorio
 RUN git clone https://github.com/DynamoRIO/dynamorio.git
 WORKDIR /root/workspace/deps/dynamorio
-RUN git checkout a7737a1aaa86348bcff14e1846275fcbb0810abd
+RUN git checkout 7048fdd6768918f3890db687350611ab141250c1
 RUN mkdir build
 WORKDIR /root/workspace/deps/dynamorio/build
 RUN cmake ../
